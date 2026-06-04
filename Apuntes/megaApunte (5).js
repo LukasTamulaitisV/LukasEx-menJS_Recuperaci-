@@ -180,11 +180,11 @@ function crearSeccionFiltros() {
 
     // Inputs y selects en BUCLE — tag = 'input' o 'select'
     const campos = [
-        { etiqueta: 'Buscar',       tag: 'input',  id: 'inputBuscar' },
-        { etiqueta: 'Equipo',       tag: 'select', id: 'selectEquipo' },
+        { etiqueta: 'Buscar', tag: 'input', id: 'inputBuscar' },
+        { etiqueta: 'Equipo', tag: 'select', id: 'selectEquipo' },
         { etiqueta: 'Nacionalidad', tag: 'select', id: 'selectNacionalidad' },
-        { etiqueta: 'Año desde',    tag: 'select', id: 'anyoDesde' },
-        { etiqueta: 'Año hasta',    tag: 'select', id: 'anyoHasta' },
+        { etiqueta: 'Año desde', tag: 'select', id: 'anyoDesde' },
+        { etiqueta: 'Año hasta', tag: 'select', id: 'anyoHasta' },
     ];
     campos.forEach(function (c) {
         const divGrupo = document.createElement('div');
@@ -200,8 +200,8 @@ function crearSeccionFiltros() {
 
     // Botones en BUCLE
     const botones = [
-        { id: 'btnFiltrar',       texto: 'Filtrar',          clase: 'btn-primario' },
-        { id: 'btnReiniciar',     texto: 'Reiniciar',        clase: 'btn-secundario' },
+        { id: 'btnFiltrar', texto: 'Filtrar', clase: 'btn-primario' },
+        { id: 'btnReiniciar', texto: 'Reiniciar', clase: 'btn-secundario' },
         { id: 'btnSoloFavoritos', texto: '★ Solo favoritos', clase: 'btn-sort' },
     ];
     botones.forEach(function (b) {
@@ -223,9 +223,9 @@ function crearSeccionFiltros() {
 function crearBotonesOrdenacion() {
     const div = document.getElementById('botonesOrden');
     const botones = [
-        { id: 'btnOrdenDefecto',   texto: 'Por defecto',   clase: 'btn-sort activo' },
-        { id: 'btnOrdenPrecio',    texto: 'Mayor precio',  clase: 'btn-sort' },
-        { id: 'btnOrdenNombre',    texto: 'A-Z',           clase: 'btn-sort' },
+        { id: 'btnOrdenDefecto', texto: 'Por defecto', clase: 'btn-sort activo' },
+        { id: 'btnOrdenPrecio', texto: 'Mayor precio', clase: 'btn-sort' },
+        { id: 'btnOrdenNombre', texto: 'A-Z', clase: 'btn-sort' },
     ];
     botones.forEach(function (b) {
         const btn = document.createElement('button');
@@ -314,10 +314,13 @@ function pintarCards(items) {
     const msg = document.getElementById('mensajeSinResultados');
     if (msg) msg.style.display = items.length === 0 ? 'block' : 'none';
 
-    // Pasar el ÍNDICE ORIGINAL (para reserva.html?id=) aunque esté filtrado
+    // Pasar el ÍNDICE ORIGINAL o el ID según tenga el JSON
     items.forEach(function (item) {
+        // Sin id en JSON → indexOf para obtener la posición original
         const indexOriginal = todosLosItems.indexOf(item);
         contenedor.appendChild(crearCard(item, indexOriginal));
+        // Con id en JSON → no necesitas indexOf, crearCard usa item.id
+        // contenedor.appendChild(crearCard(item));
     });
 }
 
@@ -425,9 +428,9 @@ function crearCard(item, index) {
     const dAcciones = document.createElement('div');
     dAcciones.classList.add('acciones');
     [
-        { texto: 'Ver ficha', clase: 'btn-ficha',  data: item.id },
-        { texto: '✎',         clase: 'btn-editar', data: item.id },
-        { texto: '✕',         clase: 'btn-borrar', data: item.id },
+        { texto: 'Ver ficha', clase: 'btn-ficha', data: item.id },
+        { texto: '✎', clase: 'btn-editar', data: item.id },
+        { texto: '✕', clase: 'btn-borrar', data: item.id },
     ].forEach(function (b) {
         const btn = document.createElement('button');
         btn.classList.add(b.clase);
@@ -447,7 +450,10 @@ function crearCard(item, index) {
     // ── Botón enlace a otra página (Reservar) ──────────────────
     const botonEnlace = document.createElement('a');
     botonEnlace.classList.add('btn', 'btn-primary', 'm-3');
-    botonEnlace.href = 'reserva.html?id=' + index; // el índice viene de pintarCards
+    // Sin id en JSON → usar index (viene de pintarCards con indexOf):
+    botonEnlace.href = 'reserva.html?id=' + index;
+    // Con id en JSON → usar item.id directamente:
+    // botonEnlace.href = 'reserva.html?id=' + item.id;
     botonEnlace.appendChild(document.createTextNode('Reservar'));
     card.appendChild(botonEnlace);
 
@@ -571,13 +577,13 @@ function mostrarPanel(item) {
 
     // Campos en BUCLE: div.campo > span(label) + texto(valor)
     const campos = [
-        { label: 'Equipo:',       valor: item.equipo },
+        { label: 'Equipo:', valor: item.equipo },
         { label: 'Nacionalidad:', valor: item.nacionalidad },
-        { label: 'Dorsal:',       valor: item.dorsal },
-        { label: 'Mundiales:',    valor: item.mundiales },
-        { label: 'Puntos:',       valor: item.puntos },
-        { label: 'Email:',        valor: item.email },
-        { label: 'Teléfono:',     valor: item.telefono },
+        { label: 'Dorsal:', valor: item.dorsal },
+        { label: 'Mundiales:', valor: item.mundiales },
+        { label: 'Puntos:', valor: item.puntos },
+        { label: 'Email:', valor: item.email },
+        { label: 'Teléfono:', valor: item.telefono },
     ];
     campos.forEach(function (c) {
         const div = document.createElement('div');
@@ -735,8 +741,8 @@ function inicializarEventos(todosLosItems) {
     // ── Ordenación en BUCLE con clase activo ───────────────────
     const ordenaciones = [
         { id: 'btnOrdenDefecto', fn: () => [...todosLosItems].sort((a, b) => a.id - b.id) },
-        { id: 'btnOrdenPrecio',  fn: () => [...todosLosItems].sort((a, b) => parseInt(b.precio) - parseInt(a.precio)) },
-        { id: 'btnOrdenNombre',  fn: () => [...todosLosItems].sort((a, b) => a.nombre.localeCompare(b.nombre)) },
+        { id: 'btnOrdenPrecio', fn: () => [...todosLosItems].sort((a, b) => parseInt(b.precio) - parseInt(a.precio)) },
+        { id: 'btnOrdenNombre', fn: () => [...todosLosItems].sort((a, b) => a.nombre.localeCompare(b.nombre)) },
     ];
     ordenaciones.forEach(function (o) {
         document.getElementById(o.id).addEventListener('click', function () {
@@ -813,14 +819,14 @@ function aplicarFiltros(items) {
     limpiarNodos(errorEl);
 
     // ── Leer controles ─────────────────────────────────────────
-    const texto       = document.getElementById('inputBuscar').value.toLowerCase().trim();
-    const equipo      = document.getElementById('selectEquipo').value;       // select texto
+    const texto = document.getElementById('inputBuscar').value.toLowerCase().trim();
+    const equipo = document.getElementById('selectEquipo').value;       // select texto
     const combustible = document.getElementById('combustible').value;        // select texto
-    const kmDesde     = document.getElementById('kmDesde').value;            // select numérico
-    const kmHasta     = document.getElementById('kmHasta').value;
-    const anyoDesde   = document.getElementById('anyoDesde').value;
-    const anyoHasta   = document.getElementById('anyoHasta').value;
-    const cambio      = document.querySelector('input[name="cambio"]:checked').value; // RADIO
+    const kmDesde = document.getElementById('kmDesde').value;            // select numérico
+    const kmHasta = document.getElementById('kmHasta').value;
+    const anyoDesde = document.getElementById('anyoDesde').value;
+    const anyoHasta = document.getElementById('anyoHasta').value;
+    const cambio = document.querySelector('input[name="cambio"]:checked').value; // RADIO
     // const soloActivos = document.getElementById('chkActivos').checked;     // CHECKBOX
 
     // ── Validación de rangos — UN if por cada rango ────────────
@@ -839,15 +845,15 @@ function aplicarFiltros(items) {
     const resultado = items.filter(function (item) {
         // Texto en dos campos (nombre/marca O modelo/equipo)
         if (texto !== '' && !item.marca.toLowerCase().includes(texto) &&
-                            !item.modelo.toLowerCase().includes(texto)) return false;
+            !item.modelo.toLowerCase().includes(texto)) return false;
         // Select coincidencia exacta
-        if (equipo      !== '' && item.equipo      !== equipo)      return false;
+        if (equipo !== '' && item.equipo !== equipo) return false;
         if (combustible !== '' && item.combustible !== combustible) return false;
         // Radio coincidencia exacta
-        if (cambio      !== '' && item.cambio      !== cambio)      return false;
+        if (cambio !== '' && item.cambio !== cambio) return false;
         // Rango numérico (parseInt al value del select)
-        if (kmDesde   !== '' && item.km   < parseInt(kmDesde))   return false;
-        if (kmHasta   !== '' && item.km   > parseInt(kmHasta))   return false;
+        if (kmDesde !== '' && item.km < parseInt(kmDesde)) return false;
+        if (kmHasta !== '' && item.km > parseInt(kmHasta)) return false;
         if (anyoDesde !== '' && item.anyo < parseInt(anyoDesde)) return false;
         if (anyoHasta !== '' && item.anyo > parseInt(anyoHasta)) return false;
         // Checkbox: if (soloActivos && item.estado !== 'Activo') return false;
@@ -863,13 +869,13 @@ function aplicarFiltros(items) {
 }
 
 function reiniciarFiltros(items) {
-    document.getElementById('inputBuscar').value  = '';
+    document.getElementById('inputBuscar').value = '';
     document.getElementById('selectEquipo').value = '';
-    document.getElementById('kmDesde').value      = '';
-    document.getElementById('kmHasta').value      = '';
-    document.getElementById('anyoDesde').value    = '';
-    document.getElementById('anyoHasta').value    = '';
-    document.getElementById('combustible').value  = '';
+    document.getElementById('kmDesde').value = '';
+    document.getElementById('kmHasta').value = '';
+    document.getElementById('anyoDesde').value = '';
+    document.getElementById('anyoHasta').value = '';
+    document.getElementById('combustible').value = '';
     // Radio: volver al primero (Todos)
     // document.querySelector('input[name="cambio"][value=""]').checked = true;
     limpiarNodos(document.getElementById('errorFiltro'));
@@ -962,13 +968,13 @@ function iniciarAutocompleteCompuesto(items) {
 // ── Alta de item nuevo ──────────────────────────────────────────
 function guardarItem(todosLosItems) {
     const nuevoItem = {
-        id:        Date.now(),  // id único
-        nombre:    document.getElementById('inputNombre').value.trim(),
-        email:     document.getElementById('inputEmail').value.trim(),
-        telefono:  document.getElementById('inputTelefono').value.trim(),
-        dorsal:    parseInt(document.getElementById('inputDorsal').value),
-        equipo:    document.getElementById('inputEquipo').value,
-        anyo:      parseInt(document.getElementById('inputAnyo').value),
+        id: Date.now(),  // id único
+        nombre: document.getElementById('inputNombre').value.trim(),
+        email: document.getElementById('inputEmail').value.trim(),
+        telefono: document.getElementById('inputTelefono').value.trim(),
+        dorsal: parseInt(document.getElementById('inputDorsal').value),
+        equipo: document.getElementById('inputEquipo').value,
+        anyo: parseInt(document.getElementById('inputAnyo').value),
         // Valores por defecto para campos no incluidos en el formulario:
         mundiales: 0, puntos: 0, estado: 'Activo', nacionalidad: 'N/D', bio: '', img: '',
     };
@@ -983,19 +989,19 @@ function guardarItem(todosLosItems) {
 // ── Alta tabla contable (sin id, inputs sueltos) ───────────────
 function guardarMovimiento(movimientos) {
     const nuevo = {
-        fecha:    document.getElementById('inputFecha').value.trim(),
+        fecha: document.getElementById('inputFecha').value.trim(),
         concepto: document.getElementById('inputConcepto').value.trim(),
-        tipo:     document.getElementById('inputDH').value,
-        importe:  parseFloat(document.getElementById('inputImporte').value) || 0,
+        tipo: document.getElementById('inputDH').value,
+        importe: parseFloat(document.getElementById('inputImporte').value) || 0,
     };
     movimientos.push(nuevo);
     setItems(movimientos);
     pintarTablaContable(movimientos);
     // Limpiar manualmente (no hay form.reset con inputs sueltos)
-    document.getElementById('inputFecha').value    = '';
+    document.getElementById('inputFecha').value = '';
     document.getElementById('inputConcepto').value = '';
-    document.getElementById('inputImporte').value  = '';
-    document.getElementById('inputDH').value        = '';
+    document.getElementById('inputImporte').value = '';
+    document.getElementById('inputDH').value = '';
 }
 
 // ── Borrar por ID (mutando el array original) ──────────────────
@@ -1029,7 +1035,7 @@ function toggleFavorito(id) {
 
 // ── Editar: activar modo edición ───────────────────────────────
 function activarModoEdicion(item) {
-    const form   = document.getElementById('formulario');
+    const form = document.getElementById('formulario');
     const titulo = document.getElementById('tituloFormulario');
     limpiarNodos(titulo);
     titulo.appendChild(document.createTextNode('Editar'));
@@ -1037,12 +1043,12 @@ function activarModoEdicion(item) {
     form.dataset.modoEdicion = item.id; // marcador para el submit
 
     // Precargar campos
-    document.getElementById('inputNombre').value   = item.nombre;
-    document.getElementById('inputEmail').value    = item.email || '';
+    document.getElementById('inputNombre').value = item.nombre;
+    document.getElementById('inputEmail').value = item.email || '';
     document.getElementById('inputTelefono').value = item.telefono || '';
-    document.getElementById('inputDorsal').value   = item.dorsal;
-    document.getElementById('inputEquipo').value   = item.equipo;
-    document.getElementById('inputAnyo').value     = item.anyo;
+    document.getElementById('inputDorsal').value = item.dorsal;
+    document.getElementById('inputEquipo').value = item.equipo;
+    document.getElementById('inputAnyo').value = item.anyo;
 
     document.getElementById('btnCancelarEdicion').style.display = 'inline-block';
     document.getElementById('seccionFormulario').scrollIntoView({ behavior: 'smooth' });
@@ -1054,12 +1060,12 @@ function editarItem(id, todosLosItems) {
     if (indice === -1) return;
     todosLosItems[indice] = {
         ...todosLosItems[indice], // conserva mundiales, puntos, bio, img...
-        nombre:   document.getElementById('inputNombre').value.trim(),
-        email:    document.getElementById('inputEmail').value.trim(),
+        nombre: document.getElementById('inputNombre').value.trim(),
+        email: document.getElementById('inputEmail').value.trim(),
         telefono: document.getElementById('inputTelefono').value.trim(),
-        dorsal:   parseInt(document.getElementById('inputDorsal').value),
-        equipo:   document.getElementById('inputEquipo').value,
-        anyo:     parseInt(document.getElementById('inputAnyo').value),
+        dorsal: parseInt(document.getElementById('inputDorsal').value),
+        equipo: document.getElementById('inputEquipo').value,
+        anyo: parseInt(document.getElementById('inputAnyo').value),
     };
     setItems(todosLosItems);
     pintarCards(todosLosItems);
@@ -1069,7 +1075,7 @@ function editarItem(id, todosLosItems) {
 
 // ── Editar: volver a modo alta ─────────────────────────────────
 function desactivarModoEdicion() {
-    const form   = document.getElementById('formulario');
+    const form = document.getElementById('formulario');
     const titulo = document.getElementById('tituloFormulario');
     limpiarNodos(titulo);
     titulo.appendChild(document.createTextNode('Registrar'));
@@ -1086,17 +1092,34 @@ function desactivarModoEdicion() {
 // [14] PASO ENTRE PÁGINAS — URL e índice
 // ═══════════════════════════════════════════════════════════════════
 
-// ── Escribir el índice/id en el enlace (en crearCard) ──────────
-// botonEnlace.href = 'reserva.html?id=' + index;     // por índice de array
-// botonEnlace.href = 'reserva.html?id=' + item.id;   // por id del JSON
+// ── VARIANTE A: por ÍNDICE del array (cuando el JSON NO tiene campo id) ──
+// En crearCard — pintarCards pasa el índice original:
+items.forEach(function (item) {
+    const indexOriginal = todosLosItems.indexOf(item);
+    contenedor.appendChild(crearCard(item, indexOriginal));
+});
+// En crearCard:
+botonEnlace.href = 'reserva.html?id=' + index;
+// En la otra página — acceder por posición:
+const index = parseInt(leerParametroURL('id'));
+const item = json.cars[index];   // acceso por posición en el array
 
-// ── Leer el parámetro en la otra página ────────────────────────
+// ── VARIANTE B: por ID del JSON (cuando el JSON SÍ tiene campo id) ──
+// En crearCard — no necesitas indexOf ni pasar index:
+botonEnlace.href = 'detalle.html?id=' + item.id;
+// En la otra página — buscar con find:
+const id   = parseInt(leerParametroURL('id'));
+const item = json.cars.find(c => c.id === id);   // busca por id
+
+// ⚠ DIFERENCIA CLAVE:
+// Sin id en JSON → indexOf + json.cars[index]  (posición, se rompe si filtras)
+// Con id en JSON → item.id + find()            (siempre encuentra el correcto)
+
+// Función para leer el parámetro
 function leerParametroURL(nombre) {
     const params = new URLSearchParams(window.location.search);
     return params.get(nombre); // string o null
 }
-// const index = parseInt(leerParametroURL('id'));
-// const item  = json.cars[index];
 
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1110,9 +1133,13 @@ async function mainReserva() {
     const response = await fetch('bbdd.json');
     const json = await response.json();
 
-    // Leer índice de la URL
+    // ── VARIANTE A: leer por ÍNDICE (JSON sin campo id) ────────
     const index = parseInt(leerParametroURL('id'));
     const coche = json.cars[index];
+
+    // ── VARIANTE B: leer por ID (JSON con campo id) ────────────
+    // const id    = parseInt(leerParametroURL('id'));
+    // const coche = json.cars.find(c => c.id === id);
 
     // Redirigir si no existe
     if (!coche) {
@@ -1163,10 +1190,10 @@ function guardarReserva(coche) {
         coche: coche,
         cliente: {
             nombreApellidos: document.querySelector('input[name="nombreApellidos"]').value.trim(),
-            dniCifNia:       document.querySelector('input[name="dniCifNia"]').value.trim(),
-            email:           document.querySelector('input[name="email"]').value.trim(),
-            telefono:        document.querySelector('input[name="telefono"]').value.trim(),
-            nota:            document.querySelector('textarea').value.trim(),
+            dniCifNia: document.querySelector('input[name="dniCifNia"]').value.trim(),
+            email: document.querySelector('input[name="email"]').value.trim(),
+            telefono: document.querySelector('input[name="telefono"]').value.trim(),
+            nota: document.querySelector('textarea').value.trim(),
         }
     };
     reservas.push(reserva);                                      // push del OBJETO
@@ -1184,20 +1211,20 @@ function guardarReserva(coche) {
 // IMPORTANTE: declarar REGEX en CADA archivo JS (no se comparten entre archivos)
 
 const REGEX = {
-    nombre:    /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/,   // letras, acentos, espacios
-    nombre4a40:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{4,40}$/,   // variante 4-40 caracteres
+    nombre: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/,   // letras, acentos, espacios
+    nombre4a40: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{4,40}$/,   // variante 4-40 caracteres
     nombreExt: /^[\w\s\-]{3,40}$/,                  // letras, números, espacios, guión
-    email:     /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/,
-    telefono:  /^\(\d{3}\)\s\d{3}-\d{3}$/,          // (999) 666-333
-    dni:       /^\d{8}[A-Z]$/,                       // 8 dígitos + letra
-    dni9:      /^\d{9}[A-Z]$/,                       // variante 9 dígitos + letra
-    cif:       /^[A-Z]\d{8}$/,                       // letra + 8 dígitos
-    nie:       /^X\d{7}[A-Z]$/,                      // X + 7 dígitos + letra
-    codigo3:   /^[A-Z]{3}$/,                         // ESP, ITA, FRA
-    fecha:     /^\d{2}\/\d{2}\/\d{4}$/,             // dd/mm/aaaa
-    urlImg:    /^(https?:\/\/.+|.+\.(jpg|jpeg|png|webp|gif))$/i,
+    email: /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/,
+    telefono: /^\(\d{3}\)\s\d{3}-\d{3}$/,          // (999) 666-333
+    dni: /^\d{8}[A-Z]$/,                       // 8 dígitos + letra
+    dni9: /^\d{9}[A-Z]$/,                       // variante 9 dígitos + letra
+    cif: /^[A-Z]\d{8}$/,                       // letra + 8 dígitos
+    nie: /^X\d{7}[A-Z]$/,                      // X + 7 dígitos + letra
+    codigo3: /^[A-Z]{3}$/,                         // ESP, ITA, FRA
+    fecha: /^\d{2}\/\d{2}\/\d{4}$/,             // dd/mm/aaaa
+    urlImg: /^(https?:\/\/.+|.+\.(jpg|jpeg|png|webp|gif))$/i,
     enteroPos: /^\d+$/,
-    decimal:   /^\d+(\.\d{1,2})?$/,
+    decimal: /^\d+(\.\d{1,2})?$/,
 };
 
 // DNI O CIF O NIE (al menos uno válido)
@@ -1313,16 +1340,16 @@ function validarFormularioSoloRegex() {
     const errores = [];
 
     const nombre = document.querySelector('input[name="nombreApellidos"]').value.trim();
-    const doc    = document.querySelector('input[name="dniCifNia"]').value.trim();
-    const email  = document.querySelector('input[name="email"]').value.trim();
-    const tel    = document.querySelector('input[name="telefono"]').value.trim();
+    const doc = document.querySelector('input[name="dniCifNia"]').value.trim();
+    const email = document.querySelector('input[name="email"]').value.trim();
+    const tel = document.querySelector('input[name="telefono"]').value.trim();
     const aceptar = document.querySelector('input[type="checkbox"]').checked;
 
     if (!REGEX.nombre4a40.test(nombre)) errores.push('El nombre es obligatorio (4-40 letras).');
-    if (!validarDocumento(doc))         errores.push('El DNI, CIF o NIE no es válido.');
-    if (!REGEX.email.test(email))       errores.push('El formato del email no es válido.');
-    if (!REGEX.telefono.test(tel))      errores.push('El teléfono debe ser (999) 666-333.');
-    if (!aceptar)                       errores.push('Debes aceptar las condiciones.');
+    if (!validarDocumento(doc)) errores.push('El DNI, CIF o NIE no es válido.');
+    if (!REGEX.email.test(email)) errores.push('El formato del email no es válido.');
+    if (!REGEX.telefono.test(tel)) errores.push('El teléfono debe ser (999) 666-333.');
+    if (!aceptar) errores.push('Debes aceptar las condiciones.');
 
     const contenedor = document.querySelector('.text-danger');
     limpiarNodos(contenedor);
@@ -1337,10 +1364,10 @@ function validarFormularioSoloRegex() {
 
 // ── Variante D: vacíos primero, luego formato (tabla contable) ─
 function validarFormularioContable() {
-    const inputFecha    = document.getElementById('inputFecha');
+    const inputFecha = document.getElementById('inputFecha');
     const inputConcepto = document.getElementById('inputConcepto');
-    const inputDH       = document.getElementById('inputDH');
-    const inputImporte  = document.getElementById('inputImporte');
+    const inputDH = document.getElementById('inputDH');
+    const inputImporte = document.getElementById('inputImporte');
 
     // Paso 1: vacíos
     if (inputFecha.value.trim() === '' || inputConcepto.value.trim() === '' ||
