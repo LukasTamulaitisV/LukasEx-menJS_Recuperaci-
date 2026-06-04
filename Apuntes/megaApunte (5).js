@@ -814,22 +814,58 @@ function eventosOrdenacionEstatica(todosLosItems) {
 // [11] FILTROS (todos los tipos juntos)
 // ═══════════════════════════════════════════════════════════════════
 
+// ── LOS 6 TIPOS DE CONTROL DE FILTRO ──────────────────────────
+// Cualquier examen será una combinación de estos 6.
+// El patrón es siempre: if (condición && no cumple) return false;
+//
+// TIPO 1 — Input texto (buscar por nombre, marca, modelo)
+//   LEER:   const texto = document.getElementById('inputBuscar').value.toLowerCase().trim();
+//   FILTER: if (texto !== '' && !item.nombre.toLowerCase().includes(texto) &&
+//                                !item.equipo.toLowerCase().includes(texto)) return false;
+//
+// TIPO 2 — Select coincidencia exacta (equipo, nacionalidad, combustible)
+//   LEER:   const equipo = document.getElementById('selectEquipo').value;
+//   FILTER: if (equipo !== '' && item.equipo !== equipo) return false;
+//
+// TIPO 3 — Select rango numérico Desde / Hasta (años, km, dorsales, precio)
+//   LEER:   const desde = document.getElementById('anyoDesde').value;
+//           const hasta = document.getElementById('anyoHasta').value;
+//   FILTER: if (desde !== '' && item.anyo < parseInt(desde)) return false;
+//           if (hasta !== '' && item.anyo > parseInt(hasta)) return false;
+//   ⚠ REGLA: parseInt al VALUE del select (siempre string), NO al campo del JSON
+//
+// TIPO 4 — Radio button (cambio: Todos / Automático / Manual)
+//   LEER:   const cambio = document.querySelector('input[name="cambio"]:checked').value;
+//   FILTER: if (cambio !== '' && item.cambio !== cambio) return false;
+//
+// TIPO 5 — Checkbox individual (solo activos, solo campeones)
+//   LEER:   const soloActivos = document.getElementById('chkActivos').checked;
+//   FILTER: if (soloActivos && item.estado !== 'Activo') return false;
+//
+// TIPO 6 — Checkbox favoritos (filtrar por array de ids de localStorage)
+//   LEER:   const soloFavs = document.getElementById('chkFavoritos').checked;
+//           const favs = getFavoritos();
+//   FILTER: if (soloFavs && !favs.includes(item.id)) return false;
+
+
 function aplicarFiltros(items) {
     const errorEl = document.getElementById('errorFiltro'); // o 'errorMensaje'
     limpiarNodos(errorEl);
 
-    // ── Leer controles ─────────────────────────────────────────
-    const texto = document.getElementById('inputBuscar').value.toLowerCase().trim();
-    const equipo = document.getElementById('selectEquipo').value;       // select texto
-    const combustible = document.getElementById('combustible').value;        // select texto
-    const kmDesde = document.getElementById('kmDesde').value;            // select numérico
-    const kmHasta = document.getElementById('kmHasta').value;
-    const anyoDesde = document.getElementById('anyoDesde').value;
-    const anyoHasta = document.getElementById('anyoHasta').value;
-    const cambio = document.querySelector('input[name="cambio"]:checked').value; // RADIO
-    // const soloActivos = document.getElementById('chkActivos').checked;     // CHECKBOX
+    // ── Leer TODOS los controles ───────────────────────────────
+    const texto = document.getElementById('inputBuscar').value.toLowerCase().trim();  // TIPO 1
+    const equipo = document.getElementById('selectEquipo').value;                       // TIPO 2
+    const combustible = document.getElementById('combustible').value;                         // TIPO 2
+    const kmDesde = document.getElementById('kmDesde').value;                             // TIPO 3
+    const kmHasta = document.getElementById('kmHasta').value;                             // TIPO 3
+    const anyoDesde = document.getElementById('anyoDesde').value;                           // TIPO 3
+    const anyoHasta = document.getElementById('anyoHasta').value;                           // TIPO 3
+    const cambio = document.querySelector('input[name="cambio"]:checked').value;        // TIPO 4
+    // const soloActivos = document.getElementById('chkActivos').checked;                     // TIPO 5
+    // const soloFavs    = document.getElementById('chkFavoritos').checked;                   // TIPO 6
+    // const favs        = getFavoritos();                                                    // TIPO 6
 
-    // ── Validación de rangos — UN if por cada rango ────────────
+    // ── Validación de rangos — UN if SEPARADO por cada rango ───
     if (kmDesde !== '' && kmHasta !== '' && parseInt(kmDesde) > parseInt(kmHasta)) {
         errorEl.appendChild(document.createTextNode('Los km Desde no pueden ser mayores que los Hasta.'));
         return;
@@ -839,24 +875,25 @@ function aplicarFiltros(items) {
         return;
     }
 
-    // ── filter encadenado ──────────────────────────────────────
-    // REGLA parseInt: el .value del select SIEMPRE es string → parseInt al select.
-    //                 item.campo va sin parsear si el JSON ya trae número.
+    // ── filter encadenado (todos los tipos juntos) ─────────────
     const resultado = items.filter(function (item) {
-        // Texto en dos campos (nombre/marca O modelo/equipo)
+        // TIPO 1 — texto en dos campos
         if (texto !== '' && !item.marca.toLowerCase().includes(texto) &&
             !item.modelo.toLowerCase().includes(texto)) return false;
-        // Select coincidencia exacta
+        // TIPO 2 — selects coincidencia exacta
         if (equipo !== '' && item.equipo !== equipo) return false;
         if (combustible !== '' && item.combustible !== combustible) return false;
-        // Radio coincidencia exacta
-        if (cambio !== '' && item.cambio !== cambio) return false;
-        // Rango numérico (parseInt al value del select)
+        // TIPO 3 — rangos numéricos (parseInt al select, NO al item)
         if (kmDesde !== '' && item.km < parseInt(kmDesde)) return false;
         if (kmHasta !== '' && item.km > parseInt(kmHasta)) return false;
         if (anyoDesde !== '' && item.anyo < parseInt(anyoDesde)) return false;
         if (anyoHasta !== '' && item.anyo > parseInt(anyoHasta)) return false;
-        // Checkbox: if (soloActivos && item.estado !== 'Activo') return false;
+        // TIPO 4 — radio button
+        if (cambio !== '' && item.cambio !== cambio) return false;
+        // TIPO 5 — checkbox individual
+        // if (soloActivos && item.estado !== 'Activo') return false;
+        // TIPO 6 — checkbox favoritos
+        // if (soloFavs && !favs.includes(item.id)) return false;
         return true;
     });
 
@@ -865,7 +902,7 @@ function aplicarFiltros(items) {
     if (msg) msg.style.display = resultado.length === 0 ? 'block' : 'none';
 
     pintarCards(resultado);
-    pintarTabla(resultado); // si hay tabla
+    pintarTabla(resultado);
 }
 
 function reiniciarFiltros(items) {
@@ -1094,22 +1131,22 @@ function desactivarModoEdicion() {
 
 // ── VARIANTE A: por ÍNDICE del array (cuando el JSON NO tiene campo id) ──
 // En crearCard — pintarCards pasa el índice original:
-items.forEach(function (item) {
-    const indexOriginal = todosLosItems.indexOf(item);
-    contenedor.appendChild(crearCard(item, indexOriginal));
-});
+//   items.forEach(function (item) {
+//       const indexOriginal = todosLosItems.indexOf(item);
+//       contenedor.appendChild(crearCard(item, indexOriginal));
+//   });
 // En crearCard:
-botonEnlace.href = 'reserva.html?id=' + index;
+//   botonEnlace.href = 'reserva.html?id=' + index;
 // En la otra página — acceder por posición:
-const index = parseInt(leerParametroURL('id'));
-const item = json.cars[index];   // acceso por posición en el array
+//   const index = parseInt(leerParametroURL('id'));
+//   const item  = json.cars[index];   // acceso por posición en el array
 
 // ── VARIANTE B: por ID del JSON (cuando el JSON SÍ tiene campo id) ──
 // En crearCard — no necesitas indexOf ni pasar index:
-botonEnlace.href = 'detalle.html?id=' + item.id;
+//   botonEnlace.href = 'detalle.html?id=' + item.id;
 // En la otra página — buscar con find:
-const id   = parseInt(leerParametroURL('id'));
-const item = json.cars.find(c => c.id === id);   // busca por id
+//   const id   = parseInt(leerParametroURL('id'));
+//   const item = json.cars.find(c => c.id === id);   // busca por id
 
 // ⚠ DIFERENCIA CLAVE:
 // Sin id en JSON → indexOf + json.cars[index]  (posición, se rompe si filtras)
